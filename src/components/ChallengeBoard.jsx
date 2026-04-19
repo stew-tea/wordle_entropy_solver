@@ -25,20 +25,20 @@ function buildUsedLetters(rows) {
 export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
   const { words: allWords, letterFreq } = wordData;
 
-  const [rows, setRows]                   = useState([]); // [{word, colors}] submitted
-  const [currentColors, setCurrentColors] = useState(() => Array(wordLength).fill('grey'));
+  const [rows, setRows]                     = useState([]);
+  const [currentColors, setCurrentColors]   = useState(() => Array(wordLength).fill('grey'));
   const [remainingWords, setRemainingWords] = useState(allWords);
-  const [aiGuess, setAiGuess]             = useState(null);
-  const [phase, setPhase]                 = useState('guessing'); // 'guessing'|'won'|'lost'
-  const [guessCount, setGuessCount]       = useState(0);
-  const [revealInput, setRevealInput]     = useState('');
-  const [usedGuesses, setUsedGuesses]     = useState(new Set());
+  const [aiGuess, setAiGuess]               = useState(null);
+  const [phase, setPhase]                   = useState('guessing');
+  const [guessCount, setGuessCount]         = useState(0);
+  const [revealInput, setRevealInput]       = useState('');
+  const [usedGuesses, setUsedGuesses]       = useState(new Set());
 
   const usedLetters = buildUsedLetters(rows);
 
-  // Compute AI's first guess on mount
+  // Compute AI's first guess on mount (pure exploration — no feedback yet)
   useEffect(() => {
-    const { word } = bestGuess(allWords, allWords, new Map(), letterFreq, new Set());
+    const { word } = bestGuess(allWords, allWords, new Map(), letterFreq, new Set(), true);
     setAiGuess(word);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -68,7 +68,7 @@ export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
       return;
     }
 
-    // Filter remaining words
+    // Filter remaining words based on feedback
     const newRemaining = filterWords(remainingWords, aiGuess, colors);
     setRemainingWords(newRemaining);
 
@@ -78,15 +78,23 @@ export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
       return;
     }
 
-    // Check for impossible state
+    // Check for impossible state (mismatched colours from player)
     if (newRemaining.length === 0) {
       setPhase('lost');
       return;
     }
 
-    // Compute next AI guess using updated state
+    // After the first guess, always exploit the filtered pool.
+    // Never go back to pure exploration — the pool is already narrowed.
     const newUsedLetters = buildUsedLetters(newRows);
-    const { word: nextGuess } = bestGuess(newRemaining, allWords, newUsedLetters, letterFreq, newUsed);
+    const { word: nextGuess } = bestGuess(
+      newRemaining,
+      allWords,
+      newUsedLetters,
+      letterFreq,
+      newUsed,
+      false  // forceExploit — use entropy on filtered pool from here on
+    );
     setAiGuess(nextGuess ?? newRemaining[0]);
     setCurrentColors(Array(wordLength).fill('grey'));
   };
