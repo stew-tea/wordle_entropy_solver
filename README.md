@@ -2,7 +2,7 @@
 
 A Wordle-style word-guessing game with an entropy-based AI suggestion engine. Built with React + Vite.
 
-**Live demo:** https://stew-tea.github.io/entropy-wordle
+**Live demo:** https://stew-tea.github.io/wordle_entropy_solver
 
 ---
 
