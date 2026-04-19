@@ -8,13 +8,12 @@ A Wordle-style word-guessing game with an entropy-based AI suggestion engine. Bu
 
 ## Features
 
-- 🌐 English and Spanish word lists
-- 📏 5, 6, or 7-letter word modes
-- 🤖 Real-time entropy-based next-guess suggestions
-- 🔤 Most informative letters panel
-- 🎹 Colour-coded on-screen keyboard
-- 🌙 Dark mode, mobile responsive
-- 📋 Shareable emoji grid (like the real Wordle)
+- English and Spanish word lists
+- 5, 6, or 7-letter word modes
+- Real-time entropy-based next-guess suggestions
+- Most informative letters panel
+- Colour-coded on-screen keyboard
+- Dark mode, mobile responsive
 
 ---
 
