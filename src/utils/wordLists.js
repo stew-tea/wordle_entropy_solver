@@ -2,7 +2,7 @@ import { normalize } from './accents';
 
 const cache = {};
 
-// Returns { words, letterFreq, normalizedSet }
+// Returns { words, wordFreq, normalizedSet }
 // normalizedSet maps normalize(word) → accented word (for accent-aware lookup)
 export async function loadWordList(lang, length) {
   const key = `${lang}${length}`;
@@ -10,11 +10,11 @@ export async function loadWordList(lang, length) {
 
   const [wordsModule, freqModule] = await Promise.all([
     import(`../data/${key}.json`),
-    import(`../data/${lang}_freq.json`),
+    import(`../data/${key}_freq.json`),   // e.g. en5_freq.json (per-length, ~250 KB)
   ]);
 
   const words      = wordsModule.default;
-  const letterFreq = freqModule.default;
+  const wordFreq = freqModule.default;
 
   // Build a map from normalized form → accented form for validation + display
   const normalizedMap = new Map();
@@ -23,7 +23,7 @@ export async function loadWordList(lang, length) {
     if (!normalizedMap.has(n)) normalizedMap.set(n, w);
   }
 
-  const result = { words, letterFreq, normalizedMap };
+  const result = { words, wordFreq, normalizedMap };
   cache[key] = result;
   return result;
 }

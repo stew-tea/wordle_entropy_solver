@@ -22,8 +22,11 @@ export function scoreguess(guess, secret) {
   return result;
 }
 
+// Use distinct chars: G=green, Y=yellow, X=grey
+// IMPORTANT: 'green'[0] === 'grey'[0] === 'g', so we must NOT use c[0] here.
+const COLOR_CODE = { green: 'G', yellow: 'Y', grey: 'X' };
 export function patternKey(colors) {
-  return colors.map(c => c[0]).join('');
+  return colors.map(c => COLOR_CODE[c] ?? 'X').join('');
 }
 
 // Keep words whose normalized form is consistent with the guess → colors feedback

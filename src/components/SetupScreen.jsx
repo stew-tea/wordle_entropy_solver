@@ -1,13 +1,22 @@
 import { useState } from 'react';
 
-export default function SetupScreen({ onStart, loadingWords }) {
+const MODE_LABELS = {
+  play:      '🟩 Play Wordle',
+  solve:     '🔍 Solve My Wordle',
+  challenge: '🤖 Challenge the AI',
+};
+
+export default function SetupScreen({ mode, onStart, onBack, loadingWords }) {
   const [lang, setLang]     = useState('en');
   const [length, setLength] = useState(5);
 
   return (
     <div className="setup-screen">
       <div className="setup-card">
-        <h2>New Game</h2>
+        {mode && (
+          <div className="setup-mode-badge">{MODE_LABELS[mode]}</div>
+        )}
+        <h2>Choose your word</h2>
 
         <div className="setup-group">
           <label>Language</label>
@@ -39,16 +48,19 @@ export default function SetupScreen({ onStart, loadingWords }) {
           </div>
         </div>
 
-        <button
-          className="btn-primary btn-large"
-          onClick={() => onStart(lang, length)}
-          disabled={loadingWords}
-        >
-          {loadingWords
-            ? <><span className="spinner" />Loading words…</>
-            : 'Start →'
-          }
-        </button>
+        <div className="setup-actions">
+          <button className="btn-ghost" onClick={onBack}>← Back</button>
+          <button
+            className="btn-primary btn-large"
+            onClick={() => onStart(lang, length)}
+            disabled={loadingWords}
+          >
+            {loadingWords
+              ? <><span className="spinner" />Loading…</>
+              : 'Start →'
+            }
+          </button>
+        </div>
       </div>
     </div>
   );

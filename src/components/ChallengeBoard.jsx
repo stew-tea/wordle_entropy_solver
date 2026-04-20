@@ -23,7 +23,7 @@ function buildUsedLetters(rows) {
 }
 
 export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
-  const { words: allWords, letterFreq } = wordData;
+  const { words: allWords, wordFreq } = wordData;
 
   const [rows, setRows]                     = useState([]);
   const [currentColors, setCurrentColors]   = useState(() => Array(wordLength).fill('grey'));
@@ -38,7 +38,7 @@ export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
 
   // Compute AI's first guess on mount (pure exploration — no feedback yet)
   useEffect(() => {
-    const { word } = bestGuess(allWords, allWords, new Map(), letterFreq, new Set(), true);
+    const { word } = bestGuess(allWords, allWords, new Map(), wordFreq, new Set(), true);
     setAiGuess(word);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -70,6 +70,11 @@ export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
 
     // Filter remaining words based on feedback
     const newRemaining = filterWords(remainingWords, aiGuess, colors);
+    console.log(
+      `[Challenge] After "${aiGuess}" ${colors.map(c=>c[0]).join('')}: ` +
+      `${remainingWords.length} → ${newRemaining.length} words remaining`,
+      newRemaining.slice(0, 10)
+    );
     setRemainingWords(newRemaining);
 
     // Check if out of guesses
@@ -80,22 +85,28 @@ export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
 
     // Check for impossible state (mismatched colours from player)
     if (newRemaining.length === 0) {
+      console.warn('[Challenge] No words match — player may have coloured tiles incorrectly');
       setPhase('lost');
       return;
     }
 
-    // After the first guess, always exploit the filtered pool.
-    // Never go back to pure exploration — the pool is already narrowed.
     const newUsedLetters = buildUsedLetters(newRows);
     const { word: nextGuess } = bestGuess(
       newRemaining,
       allWords,
       newUsedLetters,
-      letterFreq,
+      wordFreq,
       newUsed,
-      false  // forceExploit — use entropy on filtered pool from here on
+      false,
     );
-    setAiGuess(nextGuess ?? newRemaining[0]);
+
+    // Safe fallback: never re-guess a used word
+    const safeGuess = nextGuess
+      ?? newRemaining.find(w => !newUsed.has(w))
+      ?? newRemaining[0];
+    console.log(`[Challenge] Next AI guess: ${safeGuess}`);
+
+    setAiGuess(safeGuess);
     setCurrentColors(Array(wordLength).fill('grey'));
   };
 

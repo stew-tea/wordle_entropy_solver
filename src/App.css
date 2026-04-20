@@ -222,6 +222,26 @@ button { cursor: pointer; border: none; font-family: inherit; transition: all 0.
   font-weight: 600;
 }
 
+.setup-mode-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  align-self: flex-start;
+}
+
+.setup-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.setup-actions .btn-primary { flex: 1; }
+
 /* ── Game board ───────────────────────────────────────────── */
 .game-board { display: flex; flex-direction: column; gap: var(--gap); margin-top: 8px; }
 .board-row  { display: flex; gap: var(--gap); }

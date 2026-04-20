@@ -19,15 +19,10 @@ const MODES = [
   },
 ];
 
-export default function ModeSelectScreen({ lang, wordLength, onSelect, onBack }) {
+// First screen shown — no lang/length selected yet, so we show no context badge.
+export default function ModeSelectScreen({ onSelect }) {
   return (
     <div className="mode-select-screen">
-      <div className="mode-select-header">
-        <button className="btn-ghost btn-back" onClick={onBack}>← Back</button>
-        <p className="mode-select-sub">
-          {lang === 'en' ? 'English' : 'Spanish'} · {wordLength} letters
-        </p>
-      </div>
       <h2 className="mode-select-title">Choose a mode</h2>
       <div className="mode-cards">
         {MODES.map(({ id, icon, title, subtitle }) => (

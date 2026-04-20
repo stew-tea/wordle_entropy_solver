@@ -53,7 +53,7 @@ function SuggestionCard({ suggestion, remainingWords, usedLetters, isExpanded, o
 }
 
 export default function SolverBoard({ lang, wordLength, wordData, onBack }) {
-  const { words: allWords, letterFreq, normalizedMap } = wordData;
+  const { words: allWords, wordFreq, normalizedMap } = wordData;
 
   const [rows, setRows]                   = useState([]); // [{word, colors}] submitted
   const [currentInput, setCurrentInput]   = useState('');
@@ -73,7 +73,7 @@ export default function SolverBoard({ lang, wordLength, wordData, onBack }) {
     if (remainingWords.length === 0) { setSuggestions([]); return; }
     setComputing(true);
     const id = setTimeout(() => {
-      setSuggestions(top3Suggestions(remainingWords, allWords, usedLetters, letterFreq));
+      setSuggestions(top3Suggestions(remainingWords, allWords, usedLetters, wordFreq));
       setComputing(false);
     }, 0);
     return () => clearTimeout(id);

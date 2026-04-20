@@ -15,10 +15,11 @@ import SolverBoard      from './components/SolverBoard';
 import ChallengeBoard   from './components/ChallengeBoard';
 import './App.css';
 
-// appPhase: 'setup' | 'mode-select' | 'play' | 'solve' | 'challenge'
+// appPhase: 'mode-select' | 'setup' | 'play' | 'solve' | 'challenge'
 export default function App() {
-  const [appPhase, setAppPhase]   = useState('setup');
-  const [setup, setSetup]         = useState(null); // {lang, length, wordData}
+  const [appPhase, setAppPhase]       = useState('mode-select');
+  const [pendingMode, setPendingMode] = useState(null);
+  const [setup, setSetup]             = useState(null); // {lang, length, wordData}
   const [loadingWords, setLoadingWords] = useState(false);
 
   const game = useGameState();
@@ -35,7 +36,7 @@ export default function App() {
     if (appPhase !== 'play' || game.phase !== 'playing' || game.remainingWords.length === 0) return;
     setComputing(true);
     const id = setTimeout(() => {
-      const result = bestGuess(game.remainingWords, game.allWords, game.usedLetters, game.letterFreq);
+      const result = bestGuess(game.remainingWords, game.allWords, game.usedLetters, game.wordFreq);
       setSuggestion(result);
       setInfoLetters(topLetters(game.remainingWords, new Set(game.usedLetters.keys())));
       setComputing(false);
@@ -43,24 +44,25 @@ export default function App() {
     return () => clearTimeout(id);
   }, [game.remainingWords, game.phase, appPhase]);
 
-  // ── Setup → mode select ────────────────────────────────────────────────────
+  // ── Mode selected → go to setup ───────────────────────────────────────────
+  const handleModeSelect = (mode) => {
+    setPendingMode(mode);
+    setAppPhase('setup');
+  };
+
+  // ── Setup complete → start the chosen mode ─────────────────────────────────
   const handleSetupComplete = async (lang, length) => {
     setLoadingWords(true);
     const wordData = await loadWordList(lang, length);
     setLoadingWords(false);
     setSetup({ lang, length, wordData });
-    setAppPhase('mode-select');
-  };
-
-  // ── Mode selected ──────────────────────────────────────────────────────────
-  const handleModeSelect = (mode) => {
-    if (mode === 'play') {
-      game.startGame(setup.wordData, setup.lang, setup.length);
+    if (pendingMode === 'play') {
+      game.startGame(wordData, lang, length);
       setSuggestion({ word: null, narrowPct: 0 });
       setInfoLetters([]);
       setTimeout(() => inputRef.current?.focus(), 100);
     }
-    setAppPhase(mode); // 'play' | 'solve' | 'challenge'
+    setAppPhase(pendingMode);
   };
 
   const handleBack = () => setAppPhase('mode-select');
@@ -92,12 +94,12 @@ export default function App() {
       <div className="header-left">
         <h1
           className="app-title"
-          onClick={() => setAppPhase('setup')}
+          onClick={() => setAppPhase('mode-select')}
           title="Back to start"
         >
           Entropy Wordle
         </h1>
-        {appPhase !== 'setup' && appPhase !== 'mode-select' && (
+        {appPhase !== 'mode-select' && appPhase !== 'setup' && (
           <button className="btn-ghost" onClick={handleBack}>← Modes</button>
         )}
       </div>
@@ -114,24 +116,24 @@ export default function App() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  if (appPhase === 'setup') {
-    return (
-      <div className="app">
-        {header}
-        <SetupScreen onStart={handleSetupComplete} loadingWords={loadingWords} />
-      </div>
-    );
-  }
-
   if (appPhase === 'mode-select') {
     return (
       <div className="app">
         {header}
-        <ModeSelectScreen
-          lang={setup.lang}
-          wordLength={setup.length}
-          onSelect={handleModeSelect}
-          onBack={() => setAppPhase('setup')}
+        <ModeSelectScreen onSelect={handleModeSelect} />
+      </div>
+    );
+  }
+
+  if (appPhase === 'setup') {
+    return (
+      <div className="app">
+        {header}
+        <SetupScreen
+          mode={pendingMode}
+          onStart={handleSetupComplete}
+          onBack={() => setAppPhase('mode-select')}
+          loadingWords={loadingWords}
         />
       </div>
     );
