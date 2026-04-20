@@ -22,7 +22,7 @@ function buildUsedLetters(rows) {
   return map;
 }
 
-export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
+export default function ChallengeBoard({ lang, wordLength, wordData, difficulty, onBack }) {
   const { words: allWords, wordFreq } = wordData;
 
   const [rows, setRows]                     = useState([]);
@@ -119,6 +119,11 @@ export default function ChallengeBoard({ lang, wordLength, wordData, onBack }) {
         <p className="solver-hint">
           Colour the tiles as you would in real Wordle
         </p>
+        {difficulty && (
+          <div className={`difficulty-badge difficulty-${difficulty}`}>
+            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+          </div>
+        )}
       </div>
 
       {/* Grid */}

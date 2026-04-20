@@ -9,6 +9,7 @@ export function useGameState() {
   const [phase, setPhase] = useState('setup'); // 'setup'|'playing'|'won'|'lost'
   const [lang, setLang]           = useState('en');
   const [wordLength, setWordLength] = useState(5);
+  const [difficulty, setDifficulty] = useState('medium');
   const [secret, setSecret]       = useState('');
   const [allWords, setAllWords]   = useState([]);
   const [wordFreq, setLetterFreq] = useState({});
@@ -18,7 +19,7 @@ export function useGameState() {
   const [currentInput, setCurrentInput] = useState('');
   const [error, setError]         = useState('');
 
-  const startGame = useCallback((wordData, language, length) => {
+  const startGame = useCallback((wordData, language, length, diff = 'medium') => {
     const { words, wordFreq: lf, normalizedMap: nm } = wordData;
     const secretWord = pickSecret(words);
     setSecret(secretWord);
@@ -28,6 +29,7 @@ export function useGameState() {
     setRemainingWords(words);
     setLang(language);
     setWordLength(length);
+    setDifficulty(diff);
     setGuesses([]);
     setCurrentInput('');
     setError('');
@@ -89,7 +91,7 @@ export function useGameState() {
   }, new Map());
 
   return {
-    phase, lang, wordLength, secret,
+    phase, lang, wordLength, difficulty, secret,
     allWords, wordFreq, remainingWords,
     guesses, currentInput, setCurrentInput,
     error, setError,

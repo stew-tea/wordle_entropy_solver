@@ -2,26 +2,35 @@ import { normalize } from './accents';
 
 const cache = {};
 
-// Returns { words, wordFreq, normalizedSet }
-// normalizedSet maps normalize(word) → accented word (for accent-aware lookup)
-export async function loadWordList(lang, length) {
-  const key = `${lang}${length}`;
+// difficulty: 'easy' | 'medium' | 'hard'
+// Easy = top 40%, Medium = top 70%, Hard = full list
+const DIFFICULTY_CUTOFF = { easy: 0.4, medium: 0.7, hard: 1.0 };
+
+// Returns { words, wordFreq, normalizedMap }
+// words are sorted by descending frequency and sliced by difficulty.
+// normalizedMap is built from the full (unsliced) list so any valid word can be typed.
+export async function loadWordList(lang, length, difficulty = 'hard') {
+  const baseKey = `${lang}${length}`;
+  const key     = `${baseKey}_${difficulty}`;
   if (cache[key]) return cache[key];
 
-  const [wordsModule, freqModule] = await Promise.all([
-    import(`../data/${key}.json`),
-    import(`../data/${key}_freq.json`),   // e.g. en5_freq.json (per-length, ~250 KB)
-  ]);
+  // Load the freq file — it IS the word list: { word: frequency }
+  const freqModule = await import(`../data/${baseKey}_freq.json`);
+  const wordFreq   = freqModule.default;
 
-  const words      = wordsModule.default;
-  const wordFreq = freqModule.default;
+  // Sort all words by frequency descending
+  const allSorted = Object.keys(wordFreq).sort((a, b) => wordFreq[b] - wordFreq[a]);
 
-  // Build a map from normalized form → accented form for validation + display
+  // Build normalizedMap from the full list so the player can type any valid word
   const normalizedMap = new Map();
-  for (const w of words) {
+  for (const w of allSorted) {
     const n = normalize(w);
     if (!normalizedMap.has(n)) normalizedMap.set(n, w);
   }
+
+  // Slice by difficulty for the game pool
+  const cutoff = DIFFICULTY_CUTOFF[difficulty] ?? 1.0;
+  const words  = allSorted.slice(0, Math.ceil(allSorted.length * cutoff));
 
   const result = { words, wordFreq, normalizedMap };
   cache[key] = result;
@@ -29,7 +38,5 @@ export async function loadWordList(lang, length) {
 }
 
 export function pickSecret(words) {
-  // Pick from first 2000 — most common/useful words
-  const pool = words.slice(0, Math.min(2000, words.length));
-  return pool[Math.floor(Math.random() * pool.length)];
+  return words[Math.floor(Math.random() * words.length)];
 }

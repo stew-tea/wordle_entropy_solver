@@ -52,7 +52,7 @@ function SuggestionCard({ suggestion, remainingWords, usedLetters, isExpanded, o
   );
 }
 
-export default function SolverBoard({ lang, wordLength, wordData, onBack }) {
+export default function SolverBoard({ lang, wordLength, wordData, difficulty, onBack }) {
   const { words: allWords, wordFreq, normalizedMap } = wordData;
 
   const [rows, setRows]                   = useState([]); // [{word, colors}] submitted
@@ -142,6 +142,11 @@ export default function SolverBoard({ lang, wordLength, wordData, onBack }) {
         <p className="solver-hint">
           Colour tiles to match your Wordle, then Submit Row
         </p>
+        {difficulty && (
+          <div className={`difficulty-badge difficulty-${difficulty}`}>
+            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+          </div>
+        )}
       </div>
 
       {/* Grid */}

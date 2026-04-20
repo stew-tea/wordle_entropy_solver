@@ -6,9 +6,16 @@ const MODE_LABELS = {
   challenge: '🤖 Challenge the AI',
 };
 
+const DIFFICULTIES = [
+  { value: 'easy',   label: 'Easy',   hint: 'Top 40% most common words' },
+  { value: 'medium', label: 'Medium', hint: 'Top 70% most common words' },
+  { value: 'hard',   label: 'Hard',   hint: 'Full word list' },
+];
+
 export default function SetupScreen({ mode, onStart, onBack, loadingWords }) {
-  const [lang, setLang]     = useState('en');
-  const [length, setLength] = useState(5);
+  const [lang, setLang]           = useState('en');
+  const [length, setLength]       = useState(5);
+  const [difficulty, setDifficulty] = useState('medium');
 
   return (
     <div className="setup-screen">
@@ -48,11 +55,30 @@ export default function SetupScreen({ mode, onStart, onBack, loadingWords }) {
           </div>
         </div>
 
+        <div className="setup-group">
+          <label>Difficulty</label>
+          <div className="btn-group">
+            {DIFFICULTIES.map(({ value, label, hint }) => (
+              <button
+                key={value}
+                className={`btn-toggle difficulty-${value} ${difficulty === value ? 'active' : ''}`}
+                onClick={() => setDifficulty(value)}
+                title={hint}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <p className="setup-hint">
+            {DIFFICULTIES.find(d => d.value === difficulty)?.hint}
+          </p>
+        </div>
+
         <div className="setup-actions">
           <button className="btn-ghost" onClick={onBack}>← Back</button>
           <button
             className="btn-primary btn-large"
-            onClick={() => onStart(lang, length)}
+            onClick={() => onStart(lang, length, difficulty)}
             disabled={loadingWords}
           >
             {loadingWords

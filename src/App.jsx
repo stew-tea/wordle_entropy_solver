@@ -51,13 +51,13 @@ export default function App() {
   };
 
   // ── Setup complete → start the chosen mode ─────────────────────────────────
-  const handleSetupComplete = async (lang, length) => {
+  const handleSetupComplete = async (lang, length, difficulty) => {
     setLoadingWords(true);
-    const wordData = await loadWordList(lang, length);
+    const wordData = await loadWordList(lang, length, difficulty);
     setLoadingWords(false);
-    setSetup({ lang, length, wordData });
+    setSetup({ lang, length, difficulty, wordData });
     if (pendingMode === 'play') {
-      game.startGame(wordData, lang, length);
+      game.startGame(wordData, lang, length, difficulty);
       setSuggestion({ word: null, narrowPct: 0 });
       setInfoLetters([]);
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -147,6 +147,7 @@ export default function App() {
           lang={setup.lang}
           wordLength={setup.length}
           wordData={setup.wordData}
+          difficulty={setup.difficulty}
           onBack={handleBack}
         />
       </div>
@@ -161,6 +162,7 @@ export default function App() {
           lang={setup.lang}
           wordLength={setup.length}
           wordData={setup.wordData}
+          difficulty={setup.difficulty}
           onBack={handleBack}
         />
       </div>
@@ -177,6 +179,12 @@ export default function App() {
       )}
       {game.phase === 'lost' && (
         <LoseScreen secret={game.secret} guesses={game.guesses} onPlayAgain={handleBack} />
+      )}
+
+      {game.difficulty && (
+        <div className={`difficulty-badge difficulty-${game.difficulty}`}>
+          {game.difficulty.charAt(0).toUpperCase() + game.difficulty.slice(1)}
+        </div>
       )}
 
       <GameBoard
